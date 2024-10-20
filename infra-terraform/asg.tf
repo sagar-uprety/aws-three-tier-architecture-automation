@@ -82,11 +82,6 @@ module "asg" {
     }
   ]
 
-  cpu_options = {
-    core_count       = 1
-    threads_per_core = 1
-  }
-
   # This will ensure imdsv2 is enabled, required, and a single hop which is aws security
   # best practices
   # See https://docs.aws.amazon.com/securityhub/latest/userguide/autoscaling-controls.html#autoscaling-4
