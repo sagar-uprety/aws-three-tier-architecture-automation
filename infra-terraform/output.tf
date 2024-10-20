@@ -19,6 +19,6 @@ output "target_groups" {
 }
 
 output "db_instance_endpoint" {
-  value = module.rds.db_instance_endpoint
+  value = module.db.db_instance_endpoint
   description = "value of the RDS instance endpoint"
 }
