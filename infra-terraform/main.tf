@@ -12,7 +12,7 @@ module "db" {
   major_engine_version = "8.0" # DB option group
   instance_class    = "db.t3.micro"
   allocated_storage = 20
-  multi_az = true
+  multi_az = false # Multi-AZ deployment
 
   create_db_option_group    = false
   create_db_parameter_group = false
@@ -58,7 +58,7 @@ module "vpc" {
   database_subnets = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k + 6)]
 
   create_database_subnet_group = true
-  # enable_nat_gateway = true 
+  enable_nat_gateway = true 
  
   tags = {
     Name = "${local.name}-vpc"

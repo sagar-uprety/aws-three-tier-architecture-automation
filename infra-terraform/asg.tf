@@ -4,7 +4,7 @@ data "aws_ami" "amazon-linux" {
 
   filter {
     name   = "architecture"
-    values = ["arm64"]
+    values = ["x86_64"]
   }
 
   filter {
@@ -32,7 +32,7 @@ module "asg" {
   # Traffic source attachment
   traffic_source_attachments = {
     ex-alb = {
-      traffic_source_identifier = module.alb.target_groups["wordpress_asg"].arn
+      traffic_source_identifier = module.alb.target_groups["wordpress-asg"].arn
       traffic_source_type       = "elbv2" # default
     }
   }
@@ -103,8 +103,7 @@ module "asg_sg" {
   name        = "${local.name}-http-sg"
   description = "Security group with HTTP ports open for everybody (IPv4 CIDR), egress ports are all world open"
   vpc_id      = module.vpc.vpc_id
-
-  computed_egress_with_source_security_group_id = [{
+  computed_ingress_with_source_security_group_id = [{
     rule                     = "http-80-tcp"
     source_security_group_id = module.alb.security_group_id
   }]
