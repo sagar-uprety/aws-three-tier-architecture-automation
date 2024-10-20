@@ -26,23 +26,21 @@ module "alb" {
   }
 
   listeners = {
-    http = {
+    ex_http = {
       port     = 80
       protocol = "HTTP"
-
-      default_action = {
-        type             = "forward"
-        target_group_key = "wordpress_asg"
+      forward = {
+        target_group_key = "wordpress-asg"
       }
     }
   }
 
-  target_groups = [{
-    wordpress_asg = {
-      protocol          = "HTTP"
-      port              = 80
+  target_groups = {
+    wordpress-asg = {
+      backend_protocol          = "HTTP"
+      backend_port              = 80
       target_type       = "instance"
-      create_attachment = true
+      create_attachment = false
       health_check = {
         path                = "/"
         interval            = 30
@@ -53,5 +51,5 @@ module "alb" {
         protocol            = "HTTP"
         matcher             = "200-399"
       }
-  } }]
+  } }
 }
