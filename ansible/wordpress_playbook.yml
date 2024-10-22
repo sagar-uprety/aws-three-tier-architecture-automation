@@ -1,0 +1,121 @@
+---
+- name: Wait for SSM agent to be available and install WordPress
+  hosts: all
+  connection: community.aws.aws_ssm        # Use SSM for connection
+  become: yes
+  vars:
+    wordpress_path: /var/www/html
+    wordpress_url: https://wordpress.org/latest.tar.gz
+    ansible_aws_ssm_bucket_name: "ansible-automation-ssm"
+    ansible_aws_ssm_region: us-east-1
+    
+  tasks:
+    - name: Wait for SSM agent to be available
+      wait_for_connection:
+
+    - name: Install required packages
+      yum:
+        name:
+          - httpd
+          - wget
+          - tar
+        state: present
+        update_cache: yes
+
+    - name: Install MariaDB 10.5 server
+      ansible.builtin.dnf:
+        name: mariadb105-server
+        state: present
+
+    - name: Ensure MariaDB service is enabled and started
+      ansible.builtin.systemd:
+        name: mariadb
+        enabled: yes
+        state: started
+
+    - name: Install PHP 8.1 and required extensions
+      ansible.builtin.dnf:
+        name:
+          - php8.1
+          - php8.1-cli
+          - php8.1-mysqlnd
+          - php8.1-mbstring
+          - php8.1-xml
+          - php-gd
+          - php-json
+          - php-intl
+          - php-fpm
+        state: present
+
+    - name: Ensure PHP-FPM service is enabled and started (if applicable)
+      ansible.builtin.systemd:
+        name: php-fpm
+        enabled: yes
+        state: started
+
+    - name: Start and enable Apache
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: Download WordPress
+      get_url:
+        url: "{{ wordpress_url }}"
+        dest: /tmp/wordpress.tar.gz
+        mode: '0644'
+        force: yes
+
+    - name: Ensure web root exists
+      file:
+        path: "{{ wordpress_path }}"
+        state: directory
+        mode: '0755'
+
+    - name: Extract WordPress
+      unarchive:
+        src: /tmp/wordpress.tar.gz
+        dest: /tmp
+        remote_src: yes
+        creates: /tmp/wordpress
+
+    - name: Copy WordPress files to web root
+      copy:
+        src: /tmp/wordpress/
+        dest: "{{ wordpress_path }}/"
+        remote_src: yes
+        owner: apache
+        group: apache
+        mode: '0755'
+
+    - name: Copy wp-config.php template
+      template:
+        src: wp-config.php.j2
+        dest: "{{ wordpress_path }}/wp-config.php"
+        owner: apache
+        group: apache
+        mode: '0644'
+        force: yes           # Will overwrite if exists
+        backup: yes          # Will create backup if file exists
+      register: wp_config    # Registers the result of the operation
+
+    - name: Set correct permissions
+      file:
+        path: "{{ wordpress_path }}"
+        owner: apache
+        group: apache
+        recurse: yes
+        mode: '0755'
+
+    - name: Restart Apache
+      service:
+        name: httpd
+        state: restarted
+
+    - name: Clean up temporary files
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /tmp/wordpress
+        - /tmp/wordpress.tar.gz

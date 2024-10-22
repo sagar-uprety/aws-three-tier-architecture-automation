@@ -1,0 +1,9 @@
+plugin: amazon.aws.aws_ec2
+regions:
+  - us-east-1 
+filters:
+  instance-state-name: running
+  tag:aws:autoscaling:groupName:
+    - "aws-three-tier-wordpress-asg-20241022112607631700000010"
+hostnames:
+  - instance-id
