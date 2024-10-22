@@ -8,6 +8,11 @@ output "alb_dns_name" {
   description = "value of the DNS name of the ALB"
 }
 
+output "autoscaling_group_id" {
+  value = module.asg.autoscaling_group_id
+  description = "value of the autoscaling group ID"
+}
+
 output "launch_template_arn" {
   value = module.asg.launch_template_arn
   description = "value of the launch template ARN"
