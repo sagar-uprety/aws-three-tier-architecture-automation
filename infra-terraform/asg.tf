@@ -20,12 +20,11 @@ module "asg" {
   # Autoscaling group
   name = "${local.name}-asg"
 
-  min_size                  = 0
+  min_size                  = 1
   max_size                  = 2
   desired_capacity          = 1
-  wait_for_capacity_timeout = 0
   health_check_type         = "ELB"
-  health_check_grace_period = null
+  health_check_grace_period = 300
   vpc_zone_identifier       = module.vpc.private_subnets
   security_groups           = [module.asg_sg.security_group_id]
 
@@ -43,7 +42,6 @@ module "asg" {
 
   image_id          = data.aws_ami.amazon-linux.id
   instance_type     = "t2.micro"
-  ebs_optimized     = true
   enable_monitoring = true
   user_data         = base64encode(file("${path.module}/${var.provision_script}"))
 
@@ -59,29 +57,6 @@ module "asg" {
     AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   }
 
-  block_device_mappings = [
-    {
-      # Root volume
-      device_name = "/dev/xvda"
-      no_device   = 0
-      ebs = {
-        delete_on_termination = true
-        encrypted             = true
-        volume_size           = 10
-        volume_type           = "gp2"
-      }
-      }, {
-      device_name = "/dev/sda1"
-      no_device   = 1
-      ebs = {
-        delete_on_termination = true
-        encrypted             = true
-        volume_size           = 10
-        volume_type           = "gp2"
-      }
-    }
-  ]
-
   # This will ensure imdsv2 is enabled, required, and a single hop which is aws security
   # best practices
   # See https://docs.aws.amazon.com/securityhub/latest/userguide/autoscaling-controls.html#autoscaling-4
@@ -89,6 +64,10 @@ module "asg" {
     http_endpoint               = "enabled"
     http_tokens                 = "required"
     http_put_response_hop_limit = 1
+  }
+
+  tags = {
+    Name = "ansible_managed"
   }
 }
 

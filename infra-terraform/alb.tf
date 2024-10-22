@@ -42,14 +42,15 @@ module "alb" {
       target_type       = "instance"
       create_attachment = false
       health_check = {
+        enabled             = true
         path                = "/"
         interval            = 30
         port                = "traffic-port"
-        timeout             = 6
-        healthy_threshold   = 3 # 2 out of 2 successful checks
-        unhealthy_threshold = 3 # 2 out of 2 failed checks
+        timeout             = 5
+        healthy_threshold   = 2 # 2 out of 2 successful checks
+        unhealthy_threshold = 2 # 2 out of 2 failed checks
         protocol            = "HTTP"
-        matcher             = "200-399"
+        matcher             = "200-499"
       }
   } }
 }
