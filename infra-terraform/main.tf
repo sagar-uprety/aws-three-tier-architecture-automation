@@ -13,6 +13,7 @@ module "db" {
   instance_class    = "db.t3.micro"
   allocated_storage = 20
   multi_az = false # Multi-AZ deployment
+  replica_mode = 
 
   create_db_option_group    = false
   create_db_parameter_group = false

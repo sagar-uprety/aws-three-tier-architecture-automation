@@ -18,7 +18,7 @@ The key AWS resources provisioned in this setup include:
 * **RDS Database (MySQL)** for storing WordPress data
 
 ## Architecture Diagram
-![AWS Architecture](image.png)
+![AWS Architecture](./images/architecture.png)
 
 ## Prerequisites
 Ensure you have the following before proceeding:
@@ -102,6 +102,13 @@ Once the infrastructure is ready, follow these steps to install and configure Wo
    ```bash
    ansible-playbook -i wordpress.aws_ec2.yml wordpress_playbook.yml
    ```
+
+6. You should be able to see the configuration page now from your ALB DNS. If you have a custom domain, point your DNS records to ALB DNS or setup them in Route53.
+
+   ![Wordpress Config](./images/alb_dns_wordpress_sample.png)
+   
+7. Well done! After wordpress configuration, Now you can visit the site to see the deployed application :)  
+   ![Wordpress Sample](./images/wordpress_sample_2.png)
 
 ## Contributing
 Contributions are welcome! To contribute:
